@@ -17,16 +17,19 @@ export const CenterLogo: React.FC<CenterLogoProps> = ({
   const [ripples, setRipples] = useState<number[]>([]);
   const controls = useAnimationControls();
 
-  // Calculate color reveal progress (0 -> 1)
+  // Calculate color reveal progress (reaches 100% normal color at ~20% of target)
   const target = totalExpected > 0 ? totalExpected : 50;
-  const progress = Math.min(1, Math.max(0, participantCount / target));
+  const rawRatio = participantCount / target;
+  // Reaches full vibrant color when reaching around 20% (0.20) of attendees
+  const COLOR_TARGET_RATIO = 0.20;
+  const colorProgress = Math.min(1, Math.max(0, rawRatio / COLOR_TARGET_RATIO));
 
   // Dynamic filter values:
-  // 0 participants = 100% Grayscale (Black & White)
-  // 100% participants = 0% Grayscale, 100% Full Vibrant Color
-  const grayscalePercent = Math.round((1 - progress) * 100);
-  const saturatePercent = Math.round(progress * 100);
-  const brightnessPercent = Math.round(88 + progress * 12);
+  // 0% check-in = 100% Grayscale (Black & White)
+  // ~20% check-in = 0% Grayscale, 100% Normal Vibrant Color
+  const grayscalePercent = Math.round((1 - colorProgress) * 100);
+  const saturatePercent = Math.round(colorProgress * 100);
+  const brightnessPercent = Math.round(90 + colorProgress * 10);
 
   // Trigger pulse animation EXACTLY ONCE per absorption
   useEffect(() => {
@@ -65,7 +68,7 @@ export const CenterLogo: React.FC<CenterLogoProps> = ({
         <div 
           className="absolute w-80 h-48 rounded-full blur-3xl pointer-events-none transition-all duration-1000"
           style={{
-            backgroundColor: progress > 0.05 ? `rgba(37, 99, 235, ${0.08 + progress * 0.22})` : 'rgba(255, 255, 255, 0.05)',
+            backgroundColor: colorProgress > 0.05 ? `rgba(37, 99, 235, ${0.08 + colorProgress * 0.22})` : 'rgba(255, 255, 255, 0.05)',
           }}
         />
 
