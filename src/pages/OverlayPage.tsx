@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { socket } from '../services/socket';
+import { socket, getRoomId } from '../services/socket';
 import { SessionState, Participant } from '../types';
 import { QRCodeCard } from '../components/QRCodeCard';
 import { BubbleOverlay, FloatingBubble } from '../components/BubbleOverlay';
+import { CenterLogo } from '../components/CenterLogo';
 import { StatisticsModal } from '../components/StatisticsModal';
 import { soundManager } from '../utils/sound';
 import { 
   Play, RotateCcw, UserPlus, Volume2, VolumeX, Eye, EyeOff, 
-  BarChart3, ChevronRight 
+  BarChart3, ChevronRight, Settings 
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -32,7 +33,7 @@ export const OverlayPage: React.FC = () => {
     totalExpected: 50,
     duration: 60,
     timeLeft: 60,
-    orgName: 'Tổ Chức / Cộng Đồng',
+    orgName: 'CÁT THÁI',
     participants: [],
     joinUrl: ''
   });
@@ -41,6 +42,7 @@ export const OverlayPage: React.FC = () => {
   const [showControls, setShowControls] = useState(true);
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [showStats, setShowStats] = useState(false);
+  const [pulseTrigger, setPulseTrigger] = useState(0);
 
   // Sync state and listen to real-time events
   useEffect(() => {
@@ -67,10 +69,10 @@ export const OverlayPage: React.FC = () => {
   }, []);
 
   const spawnBubble = (participant: Participant) => {
-    const startX = 25 + Math.random() * 58;
-    const speed = 5.0 + Math.random() * 1.8;
+    const startX = 15 + Math.random() * 70;
+    const speed = 3.8 + Math.random() * 1.0;
     const size = 115 + Math.random() * 25;
-    const sway = (Math.random() - 0.5) * 80;
+    const sway = 0;
 
     const newBubble: FloatingBubble = {
       id: participant.id || `${Date.now()}-${Math.random()}`,
@@ -88,6 +90,11 @@ export const OverlayPage: React.FC = () => {
 
   const removeBubble = (id: string) => {
     setBubbles(prev => prev.filter(b => b.id !== id));
+  };
+
+  const handleBubbleAbsorbed = (id: string) => {
+    removeBubble(id);
+    setPulseTrigger(Date.now());
   };
 
   const handleSimulateCheckin = () => {
@@ -114,13 +121,19 @@ export const OverlayPage: React.FC = () => {
 
   return (
     <div className="relative w-screen h-screen overflow-hidden bg-transparent select-none font-sans">
-      {/* 1. Left side QR Code Card (visible when idle or running) */}
+      {/* 1. Background Center Cat Thai Logo */}
+      <CenterLogo 
+        pulseTrigger={pulseTrigger} 
+        orgName={session.orgName || 'CÁT THÁI'}
+      />
+
+      {/* 2. Left side QR Code Card (visible when idle or running) */}
       <QRCodeCard session={session} />
 
-      {/* 2. Floating Bubbles rising across the transparent stream canvas */}
-      <BubbleOverlay bubbles={bubbles} onBubbleComplete={removeBubble} />
+      {/* 3. Floating Bubbles moving into the center of the Cat Thai Logo */}
+      <BubbleOverlay bubbles={bubbles} onBubbleAbsorbed={handleBubbleAbsorbed} />
 
-      {/* 3. Button to Open Statistics (Appears on the left when time ends instead of auto-opening modal) */}
+      {/* 4. Button to Open Statistics (Appears on the left when time ends instead of auto-opening modal) */}
       <AnimatePresence>
         {session.status === 'ended' && !showStats && (
           <motion.div
@@ -151,7 +164,7 @@ export const OverlayPage: React.FC = () => {
         )}
       </AnimatePresence>
 
-      {/* 4. Statistics Modal Screen (ONLY shown when streamer clicks the button to open) */}
+      {/* 5. Statistics Modal Screen (ONLY shown when streamer clicks the button to open) */}
       <AnimatePresence>
         {session.status === 'ended' && showStats && (
           <StatisticsModal 
@@ -162,7 +175,7 @@ export const OverlayPage: React.FC = () => {
         )}
       </AnimatePresence>
 
-      {/* 5. Streamer Quick Control Bar (Bottom-right corner) */}
+      {/* 6. Streamer Quick Control Bar (Bottom-right corner) */}
       <div className="fixed bottom-4 right-4 z-50 flex items-center gap-2">
         {showControls ? (
           <div className="flex items-center gap-2 px-3 py-1.5 rounded-full apple-glass text-xs text-white">
@@ -221,6 +234,17 @@ export const OverlayPage: React.FC = () => {
                 <VolumeX className="w-3.5 h-3.5 text-zinc-500" />
               )}
             </button>
+
+            {/* Admin Dashboard Link for Streamer */}
+            <a
+              href={`/admin?room=${getRoomId()}`}
+              target="_blank"
+              rel="noreferrer"
+              title="Mở Bảng Điều Khiển Admin (chỉ dành cho Streamer)"
+              className="p-1.5 rounded-full hover:bg-white/10 transition active:scale-95 text-zinc-400 hover:text-white"
+            >
+              <Settings className="w-3.5 h-3.5" />
+            </a>
 
             {/* Hide Bar Button */}
             <button

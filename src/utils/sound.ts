@@ -1,4 +1,4 @@
-// Web Audio API synthesizer for natural bubble pop, splash & firework explosion sound
+// Web Audio API synthesizer for natural sounds
 class SoundManager {
   private ctx: AudioContext | null = null;
   public enabled: boolean = true;
@@ -12,16 +12,8 @@ class SoundManager {
     }
   }
 
-  public playPopSound() {
-    this.playFireworkPopSound();
-  }
-
-  public playSplashSound() {
-    this.playFireworkPopSound();
-  }
-
-  // Realistic Firework Explosion sound: Punchy pop + water splash + high sparkle crackles
-  public playFireworkPopSound() {
+  // Soft absorption chime when bubble enters the center of the Cat Thai logo
+  public playAbsorptionSound() {
     if (!this.enabled) return;
     try {
       this.initCtx();
@@ -32,70 +24,37 @@ class SoundManager {
 
       const now = this.ctx.currentTime;
 
-      // 1. Initial firework burst "thump/pop"
+      // Soft harmonic chime (E5 -> A5)
       const osc = this.ctx.createOscillator();
-      const gainOsc = this.ctx.createGain();
+      const gain = this.ctx.createGain();
 
-      osc.type = 'triangle';
-      osc.frequency.setValueAtTime(320, now);
-      osc.frequency.exponentialRampToValueAtTime(70, now + 0.14);
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(659.25, now); // E5
+      osc.frequency.exponentialRampToValueAtTime(880.00, now + 0.12); // A5
 
-      gainOsc.gain.setValueAtTime(0.35, now);
-      gainOsc.gain.exponentialRampToValueAtTime(0.001, now + 0.16);
+      gain.gain.setValueAtTime(0.2, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.28);
 
-      osc.connect(gainOsc);
-      gainOsc.connect(this.ctx.destination);
+      osc.connect(gain);
+      gain.connect(this.ctx.destination);
 
       osc.start(now);
-      osc.stop(now + 0.16);
-
-      // 2. Air burst / Splash noise
-      const bufferSize = Math.floor(this.ctx.sampleRate * 0.22);
-      const buffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
-      const output = buffer.getChannelData(0);
-      for (let i = 0; i < bufferSize; i++) {
-        output[i] = Math.random() * 2 - 1;
-      }
-
-      const whiteNoise = this.ctx.createBufferSource();
-      whiteNoise.buffer = buffer;
-
-      const filter = this.ctx.createBiquadFilter();
-      filter.type = 'bandpass';
-      filter.frequency.setValueAtTime(1200, now);
-      filter.Q.setValueAtTime(1.5, now);
-
-      const gainNoise = this.ctx.createGain();
-      gainNoise.gain.setValueAtTime(0.18, now);
-      gainNoise.gain.exponentialRampToValueAtTime(0.001, now + 0.22);
-
-      whiteNoise.connect(filter);
-      filter.connect(gainNoise);
-      gainNoise.connect(this.ctx.destination);
-
-      whiteNoise.start(now);
-
-      // 3. Delicate Firework Sparkle Crackles (3 micro-clicks)
-      [0.05, 0.09, 0.14].forEach((delay) => {
-        const crackleOsc = this.ctx!.createOscillator();
-        const crackleGain = this.ctx!.createGain();
-
-        crackleOsc.type = 'sine';
-        crackleOsc.frequency.setValueAtTime(1200 + Math.random() * 800, now + delay);
-        crackleOsc.frequency.exponentialRampToValueAtTime(300, now + delay + 0.04);
-
-        crackleGain.gain.setValueAtTime(0.08, now + delay);
-        crackleGain.gain.exponentialRampToValueAtTime(0.001, now + delay + 0.04);
-
-        crackleOsc.connect(crackleGain);
-        crackleGain.connect(this.ctx!.destination);
-
-        crackleOsc.start(now + delay);
-        crackleOsc.stop(now + delay + 0.04);
-      });
+      osc.stop(now + 0.28);
     } catch {
-      // Audio might be blocked until user interacts, safely ignore
+      // safely ignore
     }
+  }
+
+  public playPopSound() {
+    this.playAbsorptionSound();
+  }
+
+  public playSplashSound() {
+    this.playAbsorptionSound();
+  }
+
+  public playFireworkPopSound() {
+    this.playAbsorptionSound();
   }
 
   public playSuccessSound() {
