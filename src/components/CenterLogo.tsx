@@ -24,10 +24,11 @@ export const CenterLogo: React.FC<CenterLogoProps> = ({
   const colorProgress = Math.min(1, Math.max(0, rawRatio / COLOR_TARGET_RATIO));
 
   // Dynamic filter values:
-  // 0% check-in = 100% Grayscale (Black & White)
+  // 0% check-in = 100% Grayscale (Black & White) with clean silver brightness
   // ~20% check-in = 0% Grayscale, 100% Normal Vibrant Color
   const grayscalePercent = Math.round((1 - colorProgress) * 100);
   const saturatePercent = Math.round(colorProgress * 100);
+  const brightnessPercent = Math.round(112 - colorProgress * 12);
 
   // Trigger pulse animation EXACTLY ONCE per absorption
   useEffect(() => {
@@ -50,7 +51,7 @@ export const CenterLogo: React.FC<CenterLogoProps> = ({
           alt={orgName || "Cát Thái Logo"}
           className="w-80 md:w-96 object-contain"
           style={{
-            filter: colorProgress >= 1 ? 'none' : `grayscale(${grayscalePercent}%) saturate(${saturatePercent}%)`,
+            filter: colorProgress >= 1 ? 'none' : `grayscale(${grayscalePercent}%) saturate(${saturatePercent}%) brightness(${brightnessPercent}%)`,
             transition: 'filter 0.8s cubic-bezier(0.16, 1, 0.3, 1)',
           }}
         />
