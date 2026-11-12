@@ -40,6 +40,8 @@ interface BubbleItemComponentProps {
 }
 
 const BubbleItemComponent: React.FC<BubbleItemComponentProps> = ({ bubble, onAbsorbed }) => {
+  const hasAbsorbedRef = React.useRef(false);
+
   // Center of screen/logo is 50vw, 50vh
   // Generate curved arc towards center (50vw)
   const deltaX = 50 - bubble.startX;
@@ -47,6 +49,8 @@ const BubbleItemComponent: React.FC<BubbleItemComponentProps> = ({ bubble, onAbs
   const p2X = bubble.startX + deltaX * 0.82;
 
   const handleComplete = () => {
+    if (hasAbsorbedRef.current) return;
+    hasAbsorbedRef.current = true;
     soundManager.playAbsorptionSound();
     onAbsorbed();
   };

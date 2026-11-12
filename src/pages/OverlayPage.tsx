@@ -94,7 +94,7 @@ export const OverlayPage: React.FC = () => {
 
   const handleBubbleAbsorbed = (id: string) => {
     removeBubble(id);
-    setPulseTrigger(Date.now());
+    setPulseTrigger(prev => prev + 1);
   };
 
   const handleSimulateCheckin = () => {
@@ -124,6 +124,8 @@ export const OverlayPage: React.FC = () => {
       {/* 1. Background Center Cat Thai Logo */}
       <CenterLogo 
         pulseTrigger={pulseTrigger} 
+        participantCount={session.participants.length}
+        totalExpected={session.totalExpected}
         orgName={session.orgName || 'CÁT THÁI'}
       />
 
