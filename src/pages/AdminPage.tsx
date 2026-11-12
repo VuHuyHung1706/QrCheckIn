@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { socket } from '../services/socket';
+import { socket, getRoomId } from '../services/socket';
 import { SessionState } from '../types';
 import { 
   Play, Pause, RotateCcw, Save, Users, Clock, Building2, 
@@ -95,8 +95,8 @@ export const AdminPage: React.FC = () => {
     document.body.removeChild(link);
   };
 
-  const obsUrl = `${window.location.origin}/`;
-  const joinUrl = session.joinUrl || `${window.location.origin}/join`;
+  const obsUrl = `${window.location.origin}/?room=${getRoomId()}`;
+  const joinUrl = session.joinUrl || `${window.location.origin}/join?room=${getRoomId()}`;
   const percentage = session.totalExpected > 0 ? Math.round((session.participants.length / session.totalExpected) * 100) : 0;
 
   return (
