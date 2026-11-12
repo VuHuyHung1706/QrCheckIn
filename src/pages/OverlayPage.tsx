@@ -78,19 +78,43 @@ export const OverlayPage: React.FC = () => {
   }, []);
 
   const spawnBubble = (participant: Participant) => {
-    const startX = 15 + Math.random() * 70;
-    const speed = 3.8 + Math.random() * 1.0;
-    const size = 115 + Math.random() * 25;
-    const sway = 0;
+    // Random edge around the screen: 0 = Top, 1 = Right, 2 = Bottom, 3 = Left
+    const side = Math.floor(Math.random() * 4);
+    let startX = 50;
+    let startY = 115;
+
+    switch (side) {
+      case 0: // Top edge
+        startX = 12 + Math.random() * 76;
+        startY = -14;
+        break;
+      case 1: // Right edge
+        startX = 114;
+        startY = 12 + Math.random() * 76;
+        break;
+      case 2: // Bottom edge
+        startX = 12 + Math.random() * 76;
+        startY = 114;
+        break;
+      case 3: // Left edge
+        startX = -14;
+        startY = 12 + Math.random() * 76;
+        break;
+    }
+
+    const speed = 4.0 + Math.random() * 1.0;
+    const size = 118 + Math.random() * 22;
+    const curveDir = Math.random() > 0.5 ? 1 : -1;
 
     const newBubble: FloatingBubble = {
-      id: participant.id || `${Date.now()}-${Math.random()}`,
+      id: participant.id || `${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
       name: participant.name,
       color: participant.color,
       startX,
+      startY,
       speed,
       size,
-      sway,
+      curveDir,
       createdAt: Date.now()
     };
 

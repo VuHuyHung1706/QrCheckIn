@@ -6,10 +6,11 @@ export interface FloatingBubble {
   id: string;
   name: string;
   color: string;
-  startX: number; // percentage (15% - 85%)
-  speed: number;  // duration in seconds (3.8s - 4.8s)
+  startX: number; // percentage (-15% to 115%)
+  startY: number; // percentage (-15% to 115%)
+  speed: number;  // duration in seconds (3.8s - 5.0s)
   size: number;   // bubble diameter (115px - 145px)
-  sway: number;
+  curveDir: number; // 1 or -1 for gentle organic curve
   createdAt: number;
 }
 
@@ -42,11 +43,19 @@ interface BubbleItemComponentProps {
 const BubbleItemComponent: React.FC<BubbleItemComponentProps> = ({ bubble, onAbsorbed }) => {
   const hasAbsorbedRef = React.useRef(false);
 
-  // Center of screen/logo is 50vw, 50vh
-  // Generate curved arc towards center (50vw)
+  // Center of screen / logo is at (50vw, 50vh)
   const deltaX = 50 - bubble.startX;
-  const p1X = bubble.startX + deltaX * 0.35;
-  const p2X = bubble.startX + deltaX * 0.82;
+  const deltaY = 50 - bubble.startY;
+
+  // Gentle perpendicular curved arc offset (organic floating feel)
+  const perpX = -deltaY * 0.12 * bubble.curveDir;
+  const perpY = deltaX * 0.12 * bubble.curveDir;
+
+  const p1X = bubble.startX + deltaX * 0.35 + perpX;
+  const p1Y = bubble.startY + deltaY * 0.35 + perpY;
+
+  const p2X = bubble.startX + deltaX * 0.78 + perpX * 0.4;
+  const p2Y = bubble.startY + deltaY * 0.78 + perpY * 0.4;
 
   const handleComplete = () => {
     if (hasAbsorbedRef.current) return;
@@ -66,13 +75,13 @@ const BubbleItemComponent: React.FC<BubbleItemComponentProps> = ({ bubble, onAbs
     <motion.div
       initial={{ 
         opacity: 0, 
-        y: '105vh', 
+        y: `${bubble.startY}vh`, 
         x: `${bubble.startX}vw`, 
         scale: 0.8 
       }}
       animate={{
-        // Smooth graceful curve from bottom into the exact center of the Cat Thai logo
-        y: ['105vh', '78vh', '60vh', '50vh'],
+        // Smooth graceful curve from surrounding perimeter into the exact center of the Cat Thai logo
+        y: [`${bubble.startY}vh`, `${p1Y}vh`, `${p2Y}vh`, '50vh'],
         x: [`${bubble.startX}vw`, `${p1X}vw`, `${p2X}vw`, '50vw'],
         scale: [0.8, 1, 1, 0.08],
         opacity: [0, 1, 1, 0],
@@ -80,7 +89,7 @@ const BubbleItemComponent: React.FC<BubbleItemComponentProps> = ({ bubble, onAbs
       transition={{
         duration: bubble.speed,
         ease: [0.25, 0.1, 0.25, 1],
-        times: [0, 0.32, 0.78, 1], // Stays fully readable for 80% of travel, then absorbs into center!
+        times: [0, 0.30, 0.78, 1], // Stays fully readable for ~80% of travel, then absorbs into center!
       }}
       onAnimationComplete={handleComplete}
       exit={{ opacity: 0, scale: 0.1 }}
