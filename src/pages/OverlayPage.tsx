@@ -178,7 +178,7 @@ export const OverlayPage: React.FC = () => {
             animate={{ opacity: 1, x: 0, scale: 1 }}
             exit={{ opacity: 0, x: -50, scale: 0.95 }}
             transition={{ type: "spring", stiffness: 300, damping: 28 }}
-            className="fixed left-8 top-1/2 -translate-y-1/2 z-20 pointer-events-auto"
+            className="fixed left-8 top-[40%] -translate-y-1/2 z-20 pointer-events-auto"
           >
             <button
               onClick={() => setShowStats(true)}

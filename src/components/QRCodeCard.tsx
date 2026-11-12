@@ -32,12 +32,12 @@ export const QRCodeCard: React.FC<QRCodeCardProps> = ({ session }) => {
             transition: { duration: 0.45, ease: [0.16, 1, 0.3, 1] } 
           }}
           transition={{ type: "spring", stiffness: 300, damping: 30 }}
-          className="fixed left-8 top-1/2 -translate-y-1/2 z-20 w-80 select-none pointer-events-auto"
+          className="fixed left-8 top-[40%] -translate-y-1/2 z-20 w-80 select-none pointer-events-auto"
         >
           {/* Apple-style Frosted Glass Card */}
-          <div className="relative apple-glass-card rounded-[28px] p-6 shadow-2xl">
+          <div className="relative apple-glass-card rounded-[26px] p-5 shadow-2xl">
             {/* Header Status */}
-            <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-2">
                 <span className="relative flex h-2.5 w-2.5">
                   <span className={`relative inline-flex rounded-full h-2.5 w-2.5 ${status === 'running' ? 'bg-emerald-400' : 'bg-zinc-400'}`}></span>
