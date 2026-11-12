@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { socket, getRoomId } from '../services/socket';
 import { SessionState, Participant } from '../types';
 import { QRCodeCard } from '../components/QRCodeCard';
@@ -43,6 +43,8 @@ export const OverlayPage: React.FC = () => {
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [showStats, setShowStats] = useState(false);
   const [pulseTrigger, setPulseTrigger] = useState(0);
+  const [absorbedCount, setAbsorbedCount] = useState<number>(0);
+  const isFirstSyncRef = useRef(true);
 
   // Sync state and listen to real-time events
   useEffect(() => {
@@ -50,6 +52,13 @@ export const OverlayPage: React.FC = () => {
       setSession(updatedState);
       if (updatedState.status === 'running') {
         setShowStats(false);
+      }
+      if (isFirstSyncRef.current) {
+        isFirstSyncRef.current = false;
+        setAbsorbedCount(updatedState.participants.length);
+      } else if (updatedState.participants.length === 0) {
+        setAbsorbedCount(0);
+        setBubbles([]);
       }
     });
 
@@ -95,6 +104,7 @@ export const OverlayPage: React.FC = () => {
   const handleBubbleAbsorbed = (id: string) => {
     removeBubble(id);
     setPulseTrigger(prev => prev + 1);
+    setAbsorbedCount(prev => prev + 1);
   };
 
   const handleSimulateCheckin = () => {
@@ -110,6 +120,7 @@ export const OverlayPage: React.FC = () => {
   const handleReset = () => {
     setShowStats(false);
     setBubbles([]);
+    setAbsorbedCount(0);
     socket.emit('session:reset');
   };
 
@@ -124,7 +135,7 @@ export const OverlayPage: React.FC = () => {
       {/* 1. Background Center Cat Thai Logo */}
       <CenterLogo 
         pulseTrigger={pulseTrigger} 
-        participantCount={session.participants.length}
+        participantCount={absorbedCount}
         totalExpected={session.totalExpected}
         orgName={session.orgName || 'CÁT THÁI'}
       />
